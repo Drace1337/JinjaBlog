@@ -5,7 +5,7 @@ import datetime
 
 
 app = Flask(__name__)
-posts = requests.get('https://api.npoint.io/c790b4d5cab58020d391').json()
+posts = requests.get('https://api.npoint.io/674f5423f73deab1e9a7').json()
 post_objects = []
 for post in posts:
     post_obj = Post(post["id"], post["title"], post["subtitle"], post["body"])
@@ -16,6 +16,14 @@ year = datetime.datetime.now().year
 @app.route('/')
 def home():
     return render_template("index.html", posts=post_objects, year=year)
+
+@app.route('/contact')
+def get_contact():
+    return render_template('contact.html')
+
+@app.route('/about')
+def get_about():
+    return render_template('about.html')
 
 @app.route('/post/<int:post_id>')
 def get_post(post_id):
