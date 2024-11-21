@@ -1,7 +1,9 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, request
 from post import Post
 import requests
 import datetime
+import smtplib
+import os
 
 
 app = Flask(__name__)
@@ -17,9 +19,20 @@ year = datetime.datetime.now().year
 def home():
     return render_template("index.html", posts=post_objects, year=year)
 
-@app.route('/contact')
-def get_contact():
-    return render_template('contact.html')
+@app.route('/contact', methods=["POST", "GET"])
+def contact():
+    if request.method == "POST":
+        data = request.form
+        send_mail(data["name"], data["email"], data["phone"], data["message"])
+        return render_template("contact.html", msg_sent=True)
+    return render_template("contact.html", msg_sent=False)
+
+
+def send_mail(name, email, phone, message):
+    mail_message = f"Name: {name}\nEmail: {email}\nPhone: {phone}\nMessage: {message}"
+    with smtplib.SMTP_SSL(os.environ["SMTP_ADDRESS"], port=465) as connection:
+        connection.login(os.environ["EMAIL_ADDRESS"], os.enviro["EMAIL_PASSWORD"])
+        connection.sendmail(from_addr=os.environ["EMAIL_ADDRESS"],to_addrs=os.environ["EMAIL_ADDRESS"], msg=f"Subject:New Message!\n\{mail_message}".encode("utf-8"))
 
 @app.route('/about')
 def get_about():
